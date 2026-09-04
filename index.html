@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cognitive Gaming - Memory Assistance</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <div class="top-bar">
+        <div class="top-bar-controls">
+            <button type="button" id="accessibilitySettingsBtn" class="top-bar-btn" aria-haspopup="dialog" aria-expanded="false">
+                👁️ <span id="accessibilityDisplayLabel">Display & Accessibility</span>
+            </button>
+            <div id="languageSelector">
+                <label for="languageSelect">🌐 Language</label>
+                <select id="languageSelect">
+                    <option value="en">🇬🇧 English</option>
+                    <option value="as">🇮🇳 অসমীয়া (Assamese)</option>
+                    <option value="mni-Mtei">🇮🇳 মৈতৈলোন্ (Manipuri)</option>
+                    <option value="lus">🇮🇳 Mizo</option>
+                    <option value="bn">🇮🇳 বাংলা (Bengali)</option>
+                    <option value="ne">🇮🇳 नेपाली (Nepali)</option>
+                    <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <section id="loginSection" class="assistant">
+
+    <h2>🔐 Welcome</h2>
+
+    <p>Please choose how you want to continue.</p>
+
+    <input
+        id="loginEmail"
+        type="email"
+        placeholder="Email"
+        style="
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 1px solid #bfc8d6;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        "
+    >
+
+    <input
+        id="loginPassword"
+        type="password"
+        placeholder="Password"
+        style="
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 1px solid #bfc8d6;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        "
+    >
+
+    <button id="patientLoginBtn">
+        👴 Patient Login
+    </button>
+
+    <button id="caregiverLoginBtn"
+            style="margin-left: 10px;">
+        👨‍👩‍👧 Caregiver Login
+    </button>
+
+    <p id="loginMessage"
+       style="
+           margin-top: 20px;
+           font-weight: bold;
+       ">
+    </p>
+    
+
+</section>
+
+    <!-- App Check debug mode for local development only -->
+    <script>
+        if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+            self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+        }
+    </script>
+
+    <header id="appHeader" style="display: none;">
+        <div class="header-content">
+            <div>
+                <h1>🧠 Cognitive Gaming</h1>
+                <p>Memory Assistance & Cognitive Support Platform</p>
+            </div>
+            <div class="header-actions">
+                <span id="userBadge" class="user-badge" style="display: none;"></span>
+                <button id="logoutBtn" type="button" class="logout-btn">
+                    🚪 Log Out
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main id="appMain" style="display: none;">
+
+        <section class="welcome personalized-hero">
+            <div class="hero-top-row">
+                <h2 id="personalizedGreeting" class="personalized-greeting-title">Welcome 👋</h2>
+                <span id="personalizedDate" class="personalized-date"></span>
+            </div>
+            <p id="personalizedSubtitle" class="personalized-greeting-sub">
+                This platform provides simple cognitive activities, memory assistance, and supportive tools for elderly users.
+            </p>
+
+            <div id="dailyProgressContainer" class="daily-progress-container" role="region" aria-label="Today's Progress">
+                <div class="daily-progress-header">
+                    <span id="dailyProgressTitle" class="daily-progress-title">Today's Progress</span>
+                    <span id="dailyProgressTaskCount" class="daily-progress-count"></span>
+                    <span id="dailyProgressPct" class="daily-progress-pct">0%</span>
+                </div>
+                <div class="daily-progress-track">
+                    <div id="dailyProgressFill" class="daily-progress-fill" style="width: 0%;"></div>
+                </div>
+                <p id="dailyProgressHelp" class="daily-progress-help">
+                    Based on today's cognitive activity, mood check-in, and reminders.
+                </p>
+            </div>
+
+            <button type="button" id="primaryContinueBtn" class="primary-continue-btn">
+                ▶ Start Today's Activity
+            </button>
+        </section>
+
+        <!-- P6.1 TODAY'S PRIORITIES -->
+        <section id="todaysPrioritiesSection" class="today-priorities-section">
+            <h3 id="todaysPrioritiesTitle" class="section-title">🎯 Today's Priorities</h3>
+            <div class="priorities-grid">
+                <div id="priorityReminderCard" class="card priority-card">
+                    <div class="priority-card-header">
+                        <span class="priority-icon">📅</span>
+                        <h4 id="priorityReminderTitle">Today's Reminders</h4>
+                    </div>
+                    <p id="priorityReminderText">Checking today's reminders...</p>
+                    <button type="button" id="priorityReminderActionBtn" class="priority-btn">View Reminders</button>
+                </div>
+
+                <div id="priorityActivityCard" class="card priority-card">
+                    <div class="priority-card-header">
+                        <span class="priority-icon">🧠</span>
+                        <h4 id="priorityActivityTitle">Cognitive Activity</h4>
+                    </div>
+                    <p id="priorityActivityText">Memory Sequence available today</p>
+                    <button type="button" id="priorityActivityActionBtn" class="priority-btn">Start Activity</button>
+                </div>
+
+                <div id="priorityMoodCard" class="card priority-card">
+                    <div class="priority-card-header">
+                        <span class="priority-icon">😊</span>
+                        <h4 id="priorityMoodTitle">Mood Check-In</h4>
+                    </div>
+                    <p id="priorityMoodText">How are you feeling today?</p>
+                    <button type="button" id="priorityMoodActionBtn" class="priority-btn">Check In</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- P6.1 QUICK ACCESS SHORTCUTS -->
+        <section id="quickAccessSection" class="quick-access-section">
+            <h3 id="quickAccessTitle" class="section-title">⚡ Quick Access</h3>
+            <div class="quick-access-grid">
+                <button type="button" id="quickAccessDailyPlanBtn" class="quick-access-btn">📅 Daily Plan</button>
+                <button type="button" id="quickAccessActivitiesBtn" class="quick-access-btn">🧠 Activities</button>
+                <button type="button" id="quickAccessRemindersBtn" class="quick-access-btn">📅 Reminders</button>
+                <button type="button" id="quickAccessProgressBtn" class="quick-access-btn">📊 Progress</button>
+                <button type="button" id="quickAccessMoodBtn" class="quick-access-btn">😊 Mood</button>
+                <button type="button" id="quickAccessBreatherBtn" class="quick-access-btn">🧘 Calm Pause</button>
+                <button type="button" id="quickAccessAssistantBtn" class="quick-access-btn">🤖 AI Assistant</button>
+            </div>
+        </section>
+
+        <!-- P6.1 PATIENT SUMMARY & RECENT PERFORMANCE -->
+        <section id="patientSummaryGrid" class="patient-summary-grid">
+            <div id="patientRecentPerformanceCard" class="card summary-card">
+                <h3 id="patientPerformanceTitle">📈 Recent Performance</h3>
+                <div id="patientPerformanceContent" class="summary-card-body">
+                    <p class="summary-loading">Loading recent activity...</p>
+                </div>
+            </div>
+
+            <div id="patientLatestMoodCard" class="card summary-card">
+                <h3 id="patientMoodTitle">😊 Latest Mood</h3>
+                <div id="patientMoodContent" class="summary-card-body">
+                    <p class="summary-loading">Loading latest mood...</p>
+                </div>
+            </div>
+
+            <div id="patientMilestoneSummaryCard" class="card summary-card">
+                <h3 id="patientMilestoneTitle">🏅 Personal Milestones</h3>
+                <div id="patientMilestoneSummaryContent" class="summary-card-body">
+                    <p class="summary-loading">Loading milestones...</p>
+                </div>
+            </div>
+
+            <div id="patientStreakCard" class="card summary-card">
+                <h3 id="patientStreakTitle">🔥 Daily Consistency</h3>
+                <div id="patientStreakSummaryContent" class="summary-card-body">
+                    <p class="summary-loading">Loading streak...</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="cards">
+
+            <div id="cognitiveActivityCard" class="card">
+                <h3>🧠 Cognitive Activity</h3>
+                <p>
+                    Complete simple activities designed to exercise
+                    memory, attention, and thinking skills.
+                </p>
+                <button id="activityBtn">
+                    Start Activity
+                </button>
+                <button id="attentionBtn" style="margin-top: 10px;">
+    🎯 Attention Challenge
+</button>
+<button id="routineRecallBtn" style="margin-top: 10px;">
+    🔢 Daily Routine Recall
+</button>
+<button id="patternGameBtn" style="margin-top: 10px;">
+    🧩 Pattern Recognition
+</button>
+<button id="moodCheckinBtn" style="margin-top: 10px;">
+    😊 Mood Check-In
+</button>
+            </div>
+
+            <div class="card">
+                <h3>📅 Reminders</h3>
+                <p>
+                    Keep track of important daily reminders and routines.
+                </p>
+                <button id="reminderBtn">
+                    View Reminders
+                </button>
+            </div>
+
+            <div class="card">
+                <h3>📊 Progress</h3>
+                <p>
+                    View activity participation and progress over time.
+                </p>
+                <button id="progressBtn">
+                    View Progress
+                </button>
+            </div>
+
+            <div class="card">
+                <h3>👨‍👩‍👧 Caregiver</h3>
+                <p>
+                    A dedicated area for caregivers to support the user's
+                    daily activities and routines.
+                </p>
+                <button id="caregiverBtn">
+                    Caregiver Area
+                </button>
+            </div>
+
+            <div class="card" id="assistantCard">
+                <h3>🤖 Memory Assistant</h3>
+                <p>
+                    Ask questions or get guidance anytime with voice or text.
+                </p>
+                <button id="openAssistantBtn">
+                    Open Assistant
+                </button>
+            </div>
+
+       </section>
+
+<section id="memoryGame" class="assistant" style="display: none;">
+
+    <button type="button" class="back-to-dashboard-btn">← Back to Dashboard</button>
+
+    <h2>🧠 Memory Sequence</h2>
+
+    <div id="memoryModeSelector" style="display: flex; gap: 10px; margin: 15px 0 20px; flex-wrap: wrap;">
+        <button type="button" id="memoryStandardModeBtn" style="background: var(--blue); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 600; cursor: pointer;">
+            🔢 Standard Numbers
+        </button>
+        <button type="button" id="memoryCulturalModeBtn" style="background: #eef3ff; color: #3157d5; border: 1px solid #d4e0fc; padding: 8px 16px; border-radius: 20px; font-weight: 600; cursor: pointer;">
+            🌿 Cultural Objects
+        </button>
+    </div>
+
+    <p id="gameInstructions">
+        Remember the numbers shown below.
+    </p>
+
+    <div id="sequence"
+         style="
+            font-size: 42px;
+            font-weight: bold;
+            letter-spacing: 15px;
+            text-align: center;
+            margin: 30px 0;
+         ">
+    </div>
+
+    <div id="memoryOptions" aria-label="Memory item choices" style="display: none;"></div>
+
+    <div id="numberAnswerContainer">
+        <label for="answer">Enter the number you remember:</label>
+        <input
+            id="answer"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            maxlength="6"
+            placeholder="Enter the number"
+            aria-label="Enter the number you remember"
+            disabled
+        >
+    </div>
+
+    <button id="checkAnswer">
+        Check Answer
+    </button>
+
+    <button id="nextRound"
+            style="display: none; margin-left: 10px;">
+        Next Round
+    </button>
+
+    <div id="gameResult"
+         style="
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+         ">
+    </div>
+
+</section>
+<!-- ================================
+     P6.8 MINDFUL BREATHER & FOCUS RESET
+================================ -->
+<section id="mindfulPauseSection" class="assistant" style="display: none;">
+    <button type="button" class="back-to-dashboard-btn">← Back to Dashboard</button>
+
+    <h2 id="mindfulPauseTitle">🧘 Calm Pause & Focus Reset</h2>
+    <p id="mindfulPauseSub">Take a quiet minute to pause and breathe gently before continuing.</p>
+
+    <div class="breather-card card">
+        <div class="breather-ring-container">
+            <div id="breatherRing" class="breather-ring idle">
+                <span id="breatherPhaseText" aria-live="polite" class="breather-phase-text">Ready to begin</span>
+            </div>
+        </div>
+        <div id="breatherStatusText" class="breather-status-text">60s</div>
+
+        <div class="breather-controls">
+            <button type="button" id="startBreatherBtn" class="priority-btn" style="min-height: 52px;">
+                ▶ Start Calm Pause
+            </button>
+            <button type="button" id="pauseBreatherBtn" class="status-action-btn" style="min-height: 52px; display: none;">
+                ⏸ Pause
+            </button>
+            <button type="button" id="resetBreatherBtn" class="status-action-btn" style="min-height: 52px;">
+                🔄 Reset
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- ================================
+     ATTENTION / CONCENTRATION GAME
+================================ -->
+
+<section
+    id="attentionGame"
+    class="assistant"
+    style="display: none;"
+>
+
+    <button type="button" class="back-to-dashboard-btn">← Back to Dashboard</button>
+
+    <h2>🎯 Attention Challenge</h2>
+
+    <p id="attentionInstructions">
+        Find the number that is different from the others.
+    </p>
+
+    <div
+        id="attentionGrid"
+        style="
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 25px 0;
+        "
+    ></div>
+
+    <button id="startAttentionGame">
+        Start Attention Game
+    </button>
+
+    <p
+        id="attentionResult"
+        style="
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        "
+    ></p>
+
+</section>
+<!-- ================================
+     DAILY ROUTINE RECALL
+================================ -->
+
+<section
+    id="routineRecallGame"
+    class="assistant"
+    style="display: none;"
+>
+
+    <button type="button" class="back-to-dashboard-btn">← Back to Dashboard</button>
+
+    <h2>🔢 Daily Routine Recall</h2>
+
+    <p id="routineInstructions">
+        Remember the activities in the order shown.
+    </p>
+    <div
+    id="routineTimeOptions"
+    style="
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        margin: 25px 0;
+    "
+>
+    <button id="morningRoutineBtn">
+        🌅 Morning
+    </button>
+
+    <button id="afternoonRoutineBtn">
+        ☀️ Afternoon
+    </button>
+
+    <button id="eveningRoutineBtn">
+        🌙 Evening
+    </button>
+</div>
+
+    <!-- Routine shown during memory phase -->
+    <div
+        id="routineSequence"
+        style="
+            background: #eef3ff;
+            border: 1px solid #cbd9ef;
+            border-radius: 14px;
+            padding: 20px;
+            margin: 25px 0;
+            font-size: 22px;
+            font-weight: bold;
+            line-height: 1.8;
+            text-align: center;
+        "
+    ></div>
+
+    <!-- Options for recall -->
+    <div
+        id="routineOptions"
+        style="
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+            margin-top: 20px;
+        "
+    ></div>
+
+    <p
+        id="routineProgress"
+        style="
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        "
+    ></p>
+
+    <p
+        id="routineResult"
+        style="
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        "
+    ></p>
+
+    <button
+        id="nextRoutineRound"
+        style="display: none;"
+    >
+        Next Round
+    </button>
+
+</section>
+<!-- ================================
+     PATTERN / OBJECT RECOGNITION
+================================ -->
+
+<section
+    id="patternGame"
+    class="assistant"
+    style="display: none;"
+>
+
+    <button type="button" class="back-to-dashboard-btn">← Back to Dashboard</button>
+
+    <h2>🧩 Pattern Recognition</h2>
+
+    <p id="patternInstructions">
+        Remember the pattern shown below.
+    </p>
+
+    <div
+        id="patternDisplay"
+        style="
+            background: #eef3ff;
+            border: 1px solid #cbd9ef;
+            border-radius: 14px;
+            padding: 25px;
+            margin: 25px 0;
+            font-size: 42px;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 10px;
+        "
+    ></div>
+
+    <div
+        id="patternOptions"
+        style="
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        "
+    ></div>
+
+    <p
+        id="patternResult"
+        style="
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        "
+    ></p>
+
+    <button
+        id="nextPatternRound"
+        style="display: none;"
+    >
+        Next Pattern
+    </button>
+
+</section>
+<!-- ================================
+     MOOD CHECK-IN
+================================ -->
+
+<section
+    id="moodCheckin"
+    class="assistant"
+    style="display: none;"
+>
+
+    <button type="button" class="back-to-dashboard-btn">← Back to Dashboard</button>
+
+    <h2>😊 How Are You Feeling?</h2>
+
+    <p id="moodInstructions">
+        Choose the option that best describes how you feel today.
+    </p>
+
+    <div
+        id="moodOptions"
+        style="
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+            margin-top: 25px;
+        "
+    >
+
+        <button data-mood="Good">
+            😀 I feel good
+        </button>
+
+        <button data-mood="Okay">
+            🙂 I feel okay
+        </button>
+
+        <button data-mood="Not great">
+            😐 I'm not feeling great
+        </button>
+
+        <button data-mood="Worried">
+            😟 I feel worried
+        </button>
+
+        <button data-mood="Tired">
+            😴 I feel tired
+        </button>
+
+    </div>
+
+    <p
+        id="moodResult"
+        style="
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        "
+    ></p>
+
+</section>
+<!-- ================================
+     PATIENT REMINDERS PAGE
+================================ -->
+
+<section
+    id="remindersSection"
+    class="assistant"
+    style="
+        display: none;
+        background: linear-gradient(135deg, #ffffff, #f7f9ff);
+        border: 1px solid #dce2ea;
+        box-shadow: 0 8px 25px rgba(49, 87, 213, 0.08);
+    "
+>
+
+    <button type="button" class="back-to-dashboard-btn">← Back to Dashboard</button>
+
+    <div style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 10px;
+    ">
+
+        <div>
+            <h2 style="
+                margin: 0;
+                font-size: 30px;
+            ">
+                📅 My Reminders
+            </h2>
+
+            <p style="
+                margin: 8px 0 0;
+                color: #526070;
+                font-size: 17px;
+            ">
+                Your caregiver's reminders for today and upcoming days.
+            </p>
+        </div>
+
+        <div style="
+            font-size: 40px;
+            background: #eef3ff;
+            padding: 12px 16px;
+            border-radius: 16px;
+        ">
+            🔔
+        </div>
+
+    </div>
+
+    <!-- P6.3 REMINDER PRESENTATION FILTER BAR -->
+    <div id="reminderFilterBar" class="reminder-filter-bar" role="region" aria-label="Reminder Filters">
+        <button type="button" class="reminder-filter-btn active" data-filter="all" id="filterAllBtn">All</button>
+        <button type="button" class="reminder-filter-btn" data-filter="pending" id="filterPendingBtn">Pending</button>
+        <button type="button" class="reminder-filter-btn" data-filter="completed" id="filterCompletedBtn">Completed</button>
+    </div>
+
+    <div id="remindersContent">
+
+        <div style="
+            text-align: center;
+            padding: 35px 15px;
+            color: #657184;
+        ">
+            Loading reminders...
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ================================
+     SMART DAILY PLANNER (P6.2)
+================================ -->
+<section id="dailyPlanSection" class="assistant" style="display: none;">
+    <button type="button" class="back-to-dashboard-btn">← Back to Dashboard</button>
+    <div class="section-header-row" style="margin-bottom: 20px;">
+        <div>
+            <h2 id="dailyPlanTitle" style="margin: 0; font-size: 28px;">📅 Daily Plan</h2>
+            <p id="dailyPlanSubtitle" style="margin: 6px 0 0; color: var(--secondary); font-size: 16px;">
+                Your plan for today organized by time of day.
+            </p>
+        </div>
+    </div>
+
+    <div id="dailyPlanSummary" class="daily-plan-summary card" role="region" aria-label="Daily Plan Summary">
+        <div class="summary-stat-item">
+            <span id="planTotalTasksLabel" class="stat-label">Total Tasks</span>
+            <span id="dailyPlanTotalCount" class="stat-value">0</span>
+        </div>
+        <div class="summary-stat-item">
+            <span id="planCompletedTasksLabel" class="stat-label">Completed</span>
+            <span id="dailyPlanCompletedCount" class="stat-value green">0</span>
+        </div>
+        <div class="summary-stat-item">
+            <span id="planRemainingTasksLabel" class="stat-label">Remaining</span>
+            <span id="dailyPlanRemainingCount" class="stat-value amber">0</span>
+        </div>
+    </div>
+
+    <div id="dailyPlanTimeline" class="daily-plan-timeline">
+        <!-- 🌅 Morning Group -->
+        <div id="dailyPlanMorningGroup" class="plan-group card">
+            <div class="plan-group-header">
+                <h3>🌅 <span id="groupMorningTitle">Morning</span> <span class="group-time-range">(00:00 – 11:59)</span></h3>
+            </div>
+            <div id="morningTasksList" class="plan-tasks-list"></div>
+        </div>
+
+        <!-- ☀️ Afternoon Group -->
+        <div id="dailyPlanAfternoonGroup" class="plan-group card">
+            <div class="plan-group-header">
+                <h3>☀️ <span id="groupAfternoonTitle">Afternoon</span> <span class="group-time-range">(12:00 – 16:59)</span></h3>
+            </div>
+            <div id="afternoonTasksList" class="plan-tasks-list"></div>
+        </div>
+
+        <!-- 🌙 Evening Group -->
+        <div id="dailyPlanEveningGroup" class="plan-group card">
+            <div class="plan-group-header">
+                <h3>🌙 <span id="groupEveningTitle">Evening</span> <span class="group-time-range">(17:00 – 23:59)</span></h3>
+            </div>
+            <div id="eveningTasksList" class="plan-tasks-list"></div>
+        </div>
+
+        <!-- 📋 Anytime / Flexible Group -->
+        <div id="dailyPlanAnytimeGroup" class="plan-group card">
+            <div class="plan-group-header">
+                <h3>📋 <span id="groupAnytimeTitle">Anytime</span></h3>
+            </div>
+            <div id="anytimeTasksList" class="plan-tasks-list"></div>
+        </div>
+    </div>
+</section>
+
+    <!-- ================================
+     CREATE REMINDER
+================================ -->
+
+<section
+    id="createReminderSection"
+    class="assistant"
+    style="display: none;"
+>
+
+    <h2>🔔 Create Reminder</h2>
+
+    <p>
+        Create a reminder for the patient.
+    </p>
+
+    <label for="reminderTitle">
+        Reminder
+    </label>
+
+    <input
+        id="reminderTitle"
+        type="text"
+        placeholder="Example: Drink water"
+        style="
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 1px solid #bfc8d6;
+            border-radius: 10px;
+            margin: 10px 0 15px;
+        "
+    >
+
+    <label for="reminderType">
+        Type
+    </label>
+
+    <input
+        id="reminderType"
+        type="text"
+        placeholder="Example: Hydration"
+        style="
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 1px solid #bfc8d6;
+            border-radius: 10px;
+            margin: 10px 0 15px;
+        "
+    >
+
+    <label for="reminderDate">
+        Date
+    </label>
+
+    <input
+        id="reminderDate"
+        type="date"
+        style="
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 1px solid #bfc8d6;
+            border-radius: 10px;
+            margin: 10px 0 15px;
+        "
+    >
+
+    <label for="reminderTime">
+        Time
+    </label>
+
+    <input
+        id="reminderTime"
+        type="time"
+        style="
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 1px solid #bfc8d6;
+            border-radius: 10px;
+            margin: 10px 0 15px;
+        "
+    >
+
+    <button id="saveReminderBtn">
+        💾 Save Reminder
+    </button>
+
+    <p
+    id="reminderMessage"
+    style="
+        margin-top: 15px;
+        font-weight: bold;
+    "
+></p>
+
+<h3 style="
+    margin-top: 30px;
+    font-size: 23px;
+">
+    📋 Saved Reminders
+</h3>
+
+<div id="caregiverRemindersContent">
+
+    <div style="
+        background: #f4f7fb;
+        padding: 20px;
+        border-radius: 14px;
+        color: #657184;
+    ">
+        Loading reminders...
+    </div>
+
+</div>
+
+</section>
+<!-- ================================
+     PATIENT PROGRESS
+================================ -->
+
+<section
+    id="progressSection"
+    class="assistant"
+    style="display: none;"
+>
+
+    <button type="button" class="back-to-dashboard-btn">← Back to Dashboard</button>
+
+    <h2>📊 My Progress</h2>
+
+    <p>
+        Your cognitive activity performance is shown below.
+    </p>
+
+    <div id="progressContent">
+        Loading progress...
+    </div>
+
+</section>
+<!-- ================================
+     CAREGIVER DASHBOARD
+================================ -->
+
+<section
+    id="caregiverSection"
+    class="assistant"
+    style="display: none;"
+>
+
+    <h2>👨‍👩‍👧 Caregiver Dashboard</h2>
+
+    <p>
+        Monitor the patient's cognitive activity and recent performance.
+    </p>
+
+    <div id="caregiverContent">
+        Loading caregiver dashboard...
+    </div>
+
+</section>
+        <section id="assistantSection" class="assistant" style="display: none;">
+
+            <button type="button" class="back-to-dashboard-btn">← Back to Dashboard</button>
+
+            <h2>🤖 Memory Assistant</h2>
+
+            <p>
+                Ask the assistant a general question or request help
+                with using the platform.
+            </p>
+
+            <textarea
+                id="prompt"
+                placeholder="Type your question here..."
+            ></textarea>
+
+            <div class="assistant-actions" aria-label="Assistant controls">
+                <button id="startListening" type="button" aria-pressed="false">
+                    Start listening
+                </button>
+
+                <button id="askGemini" type="button">
+                    Ask Assistant
+                </button>
+
+                <button id="repeatResponse" type="button" disabled>
+                    Read answer aloud
+                </button>
+            </div>
+
+            <p id="voiceStatus" class="voice-status" role="status" aria-live="polite">
+                Tap “Start listening” to ask your question out loud.
+            </p>
+
+            <div id="response">
+                The assistant's response will appear here.
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer>
+        Cognitive Gaming • AI-Based Cognitive & Memory Assistance
+    </footer>
+
+    <!-- In-Page Feedback Toasts & Confirmation Modal (P2.3) -->
+    <div id="toastContainer" role="region" aria-label="Notifications" aria-live="polite"></div>
+    <!-- Global Floating AI Assistant (P5.2) -->
+    <div id="floatingAssistantContainer" class="floating-assistant-container" style="display: none;">
+        <button id="floatingAssistantBtn" type="button" class="floating-assistant-btn" aria-label="AI Assistant" aria-expanded="false" aria-controls="floatingAssistantPanel">
+            <span class="floating-assistant-icon" aria-hidden="true">🤖</span>
+            <span class="floating-assistant-label">AI Assistant</span>
+        </button>
+
+        <div id="floatingAssistantPanel" class="floating-assistant-panel" role="dialog" aria-modal="false" aria-labelledby="floatingAssistantTitle" style="display: none;">
+            <div class="floating-assistant-header">
+                <div class="floating-assistant-title-group">
+                    <span class="floating-assistant-title-icon">🤖</span>
+                    <div>
+                        <h3 id="floatingAssistantTitle" class="floating-assistant-title">AI Assistant</h3>
+                        <span id="floatingAssistantDisclaimer" class="floating-assistant-disclaimer">App assistant only • Not for medical advice</span>
+                    </div>
+                </div>
+                <button id="closeFloatingAssistantBtn" type="button" class="close-floating-assistant-btn" aria-label="Close Assistant">✕</button>
+            </div>
+
+            <div id="floatingAssistantMessages" class="floating-assistant-messages" role="log" aria-live="polite"></div>
+
+            <div class="floating-assistant-input-area">
+                <textarea id="floatingAssistantInput" class="floating-assistant-input" rows="1" placeholder="Type your question..."></textarea>
+                <button id="floatingAssistantSendBtn" type="button" class="floating-assistant-send-btn" aria-label="Send">
+                    <span aria-hidden="true">➔</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmModalOverlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalBody">
+        <div class="app-modal">
+            <h3 id="modalTitle" class="app-modal-title">Confirm Action</h3>
+            <p id="modalBody" class="app-modal-body">Are you sure you want to proceed?</p>
+            <div class="app-modal-actions">
+                <button type="button" id="modalCancelBtn" class="app-modal-btn-cancel">Cancel</button>
+                <button type="button" id="modalConfirmBtn" class="app-modal-btn-confirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- P6.9 ACCESSIBILITY & DISPLAY SETTINGS MODAL -->
+    <div id="accessibilityModalOverlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="accessibilityModalTitle">
+        <div class="accessibility-modal card">
+            <div class="accessibility-modal-header">
+                <div class="accessibility-modal-title-group">
+                    <span class="accessibility-modal-icon" aria-hidden="true">👁️</span>
+                    <div>
+                        <h3 id="accessibilityModalTitle" class="accessibility-modal-title">Display & Accessibility</h3>
+                        <p id="accessibilityModalDesc" class="accessibility-modal-sub">Adjust text size and contrast for comfortable viewing.</p>
+                    </div>
+                </div>
+                <button type="button" id="closeAccessibilityModalBtn" class="close-accessibility-btn" aria-label="Close settings">✕</button>
+            </div>
+
+            <div class="accessibility-settings-content">
+                <!-- Text Size Section -->
+                <div class="accessibility-setting-group">
+                    <label id="textSizeHeading" class="accessibility-setting-label">Text Size</label>
+                    <div class="accessibility-options-grid" role="group" aria-labelledby="textSizeHeading">
+                        <button type="button" id="textSizeStandardBtn" class="accessibility-opt-btn" data-text-scale="standard" aria-pressed="true">
+                            <span class="opt-preview standard">A</span>
+                            <span id="textSizeStandardLabel">Standard</span>
+                        </button>
+                        <button type="button" id="textSizeLargeBtn" class="accessibility-opt-btn" data-text-scale="large" aria-pressed="false">
+                            <span class="opt-preview large">A</span>
+                            <span id="textSizeLargeLabel">Large (+15%)</span>
+                        </button>
+                        <button type="button" id="textSizeExtraLargeBtn" class="accessibility-opt-btn" data-text-scale="extra-large" aria-pressed="false">
+                            <span class="opt-preview extra-large">A</span>
+                            <span id="textSizeExtraLargeLabel">Extra Large (+30%)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- High Contrast Section -->
+                <div class="accessibility-setting-group">
+                    <label id="highContrastHeading" class="accessibility-setting-label">High Contrast</label>
+                    <div class="accessibility-options-grid" role="group" aria-labelledby="highContrastHeading">
+                        <button type="button" id="highContrastOffBtn" class="accessibility-opt-btn" data-contrast="off" aria-pressed="true">
+                            <span class="opt-icon" aria-hidden="true">⚪</span>
+                            <span id="highContrastOffLabel">Off (Standard Calm)</span>
+                        </button>
+                        <button type="button" id="highContrastOnBtn" class="accessibility-opt-btn" data-contrast="on" aria-pressed="false">
+                            <span class="opt-icon" aria-hidden="true">⚫</span>
+                            <span id="highContrastOnLabel">On (Enhanced Contrast)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accessibility-modal-footer">
+                <button type="button" id="resetDisplaySettingsBtn" class="accessibility-reset-btn">
+                    🔄 <span id="resetDisplaySettingsLabel">Reset to Standard</span>
+                </button>
+                <button type="button" id="saveDisplaySettingsBtn" class="accessibility-save-btn">
+                    ✓ <span id="saveDisplaySettingsLabel">Done</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script type="module" src="./app.js"></script>
+
+</body>
+</html>
